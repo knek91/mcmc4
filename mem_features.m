@@ -1,18 +1,30 @@
-function [X, Y] = mem_features(fnumbers)
+function [X, Y, feat_names] = mem_features(fnumbers)
 
 X = [];
 Y = false(0);
 
+% read features names
+f = fopen('mfeatures.txt','r');
+feat_names = {};
+while ~feof(f)
+    s = fgetl(f);
+    feat_names = [feat_names, s];
+end
+fclose(f);
+% normalization
+for i = 1 : numel(feat_names)
+    feat_names = [feat_names, [feat_names{i} ' (normalized)']];
+end
+
 for fnumber = fnumbers
     
     fname = sprintf('mem_features%d.mat', fnumber);
+    model = read_mark(fnumber);
+    model = connect_nodes(model);
 
     if exist(fname,'file')
         load(fname)
     else    
-        model = read_mark(fnumber);
-        model = connect_nodes(model);
-
         f = zeros(1, 2 * 37);
         feat = zeros(model.memNumber, numel(f));
 
@@ -26,96 +38,94 @@ for fnumber = fnumbers
             [arc_int, arc, bwarc] = approx_arc(img, trt);    
 
             % Turtle sum intensity
-            f(1) = sum(img(trt));
+            feat(j,1) = sum(img(trt));
 
             % Arc mean intensity 
-            f(2) = arc_int;
+            feat(j,2) = arc_int;
 
             % Membrane length
-            f(3) = s;
+            feat(j,3) = s;
 
             % TA max,mean,std distance (euclidian)
             [trt_x,trt_y] = ind2sub(size(trt), find(trt));
             dst = arcdist(trt_x, trt_y, arc);
-            f(4) = max(dst);
-            f(5) = mean(dst);
-            f(6) = std(dst);
+            feat(j,4) = max(dst);
+            feat(j,5) = mean(dst);
+            feat(j,6) = std(dst);
 
             % TA mean intensity difference
-            f(7) = trt_int - arc_int;
+            feat(j,7) = trt_int - arc_int;
 
             % Arc radius
-            f(8) = arc(3);
+            feat(j,8) = arc(3);
 
             % TA max,mean,std distance (chess, max)
             [dx dy] = pr_arcdist(trt, arc, @max);
-            f(9) = max([dx dy]);
-            f(10) = mean([dx dy]);
-            f(11) = std([dx dy]);
+            feat(j,9) = max([dx dy]);
+            feat(j,10) = mean([dx dy]);
+            feat(j,11) = std([dx dy]);
 
             % TA max,mean,std distance (chess, mean)
             [dx dy] = pr_arcdist(trt, arc, @mean);
             dst = [dx dy];
-            f(12) = max(dst);
-            f(13) = mean(dst);
-            f(14) = std(dst);
+            feat(j,12) = max(dst);
+            feat(j,13) = mean(dst);
+            feat(j,14) = std(dst);
 
             % TA number, value of intensity peaks
             tpeaks = findpeaks(img(trt));
             apeaks = findpeaks(img(bwarc)); 
-            f(15) = numel(tpeaks);
-            f(16) = numel(apeaks);
-            f(17) = numel(max(tpeaks));
-            f(18) = numel(max(apeaks));
+            feat(j,15) = numel(tpeaks);
+            feat(j,16) = numel(apeaks);
+            feat(j,17) = numel(max(tpeaks));
+            feat(j,18) = numel(max(apeaks));
 
             % T max,mean,std chess distance to border
             dstx = min(trt_x - 1, s - trt_x);
             dsty = min(trt_y - 1, s - trt_y);
             dst = [dstx(:); dsty(:)];
-            f(19) = max(dst);
-            f(20) = mean(dst);
-            f(21) = std(dst);
+            feat(j,19) = max(dst);
+            feat(j,20) = mean(dst);
+            feat(j,21) = std(dst);
 
             % T discontinuity number; max, mean, std value, min-max
             dy = sum(trt,1);
             dx = sum(trt,2)';
             dd = [dy dx]-1;
-            f(22) = nnz(dd);
-            f(23) = max(dd);
-            f(24) = mean(dd);
-            f(25) = std(dd);
-            f(26) = min(max(dx,dy));
+            feat(j,22) = nnz(dd);
+            feat(j,23) = max(dd);
+            feat(j,24) = mean(dd);
+            feat(j,25) = std(dd);
+            feat(j,26) = min(max(dx,dy));
 
             % Turtle-diagonal max,mean,std chess max,mean distance
             [~,~,dd] = pr_diagdist(trt,@max);
-            f(27) = max(dd);
-            f(28) = mean(dd);
-            f(29) = std(dd);
+            feat(j,27) = max(dd);
+            feat(j,28) = mean(dd);
+            feat(j,29) = std(dd);
 
             [~,~,dd] = pr_diagdist(trt,@mean);
-            f(30) = max(dd);
-            f(31) = mean(dd);
-            f(32) = std(dd);
+            feat(j,30) = max(dd);
+            feat(j,31) = mean(dd);
+            feat(j,32) = std(dd);
 
             % TD max,mean,std euclidian distance
             dst = diagdist(trt_x, trt_y, s);
-            f(33) = max(dst);
-            f(34) = mean(dst);
-            f(35) = std(dst);
+            feat(j,33) = max(dst);
+            feat(j,34) = mean(dst);
+            feat(j,35) = std(dst);
 
             % T equal ways area, log number
             W = turtle_ways(F);
-            f(36) = nnz(W);
-            f(37) = log(W(1,1));
+            feat(j,36) = nnz(W);
+            feat(j,37) = log(W(1,1));
 
             % Normalization 
-            f(38:end) = f(1:37) / s;
+            feat(j,38:end) = feat(j,1:37) / s;
 
             %%%%%%%%%%%%%%%%%%%%%%%%
 
-            feat(j,:) = f;
-
-            if mod(model.memNumber, 100) == 0
+            if mod(j, 100) == 0
                 waitbar(j / model.memNumber,wb);
             end
         end

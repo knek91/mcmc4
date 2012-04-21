@@ -1,0 +1,37 @@
+T intensity (sum)
+A intensity (mean)
+Node distance
+TA euclidian distance (max)
+TA euclidian distance (mean)
+TA euclidian distance (std)
+TA mean intensity difference
+A radius
+TA chess-max distance (max)
+TA chess-max distance (mean)
+TA chess-max distance (std)
+TA chess-mean distance (max)
+TA chess-mean distance (mean)
+TA chess-mean distance (std)
+T peaks number
+A peaks number
+T max peak
+A max peak
+TB chess distance (max)
+TB chess distance (mean)
+TB chess distance (std)
+T discontinuity (number)
+T discontinuity (max)
+T discontinuity (mean)
+T discontinuity (std)
+T discontinuity (min-max)
+TD chess-max distance (max)
+TD chess-max distance (mean)
+TD chess-max distance (std)
+TD chess-mean distance (max)
+TD chess-mean distance (mean)
+TD chess-mean distance (std)
+TD euclidian distance (max)
+TD euclidian distance (mean)
+TD euclidian distance (std)
+T ways area
+T ways log number

@@ -1,7 +1,7 @@
 %% Start example
 
 % create a model
-model = create_model(fnumber, fnumbers);
+model = create_model(1,1);
 
 % start gibbs
 iters = gibbs(model, 'maxiter', 10, 'ucross', true, 'uarea', true);
@@ -10,7 +10,6 @@ iters = gibbs(model, 'maxiter', 10, 'ucross', true, 'uarea', true);
 figure, show_lines(model, iters.mbest)
 
 %% Code below is for one of the reports (unnecessary to run)
-
 %% результаты тестирования старых мсмс на двух картинках
 % признаки берутся по обоим картинкам (просто объединяем прецеденты)
 % признаки на унарные потенциалы старые

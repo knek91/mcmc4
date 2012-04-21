@@ -25,10 +25,13 @@ fprintf('done (%.2f sec)\n', toc)
 
 %% Разделяющие признаки на мембраны
 fprintf('Разделяющие признаки на мембраны (унарные потенциалы)...'), tic
-% [pfeat, xfeat, good_features] = mem_stat(ffeat);
-% mpr = mem_prob(pfeat, xfeat, good_features, fnumber);
-% model.mpr = mpr;
-model.mpr = mem_feature_old(model, ffeat);
+% model.mpr = mem_feature_old(model, ffeat); % old working features
+[X, mmark] = mem_features(ffeat);
+Y = zeros(size(mmark));
+Y(mmark) = 1;
+Y(~mmark) = -1;
+w = LassoIteratedRidge(X, double(Y), 2);
+model.mpr = 1 ./ (1 + exp(- X * w ));
 model.mprob = val2adj(model.mpr, model.edges, model.nodNumber);
 fprintf('done (%.2f sec)\n', toc)
 
