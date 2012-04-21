@@ -1,3 +1,6 @@
+%%model = create_model(fnumber, ffeat)
+% fnumber   image number
+% ffeat     image numbers to extract features
 function model = create_model(fnumber, ffeat)
 %% Смотрим на диске
 % fname = 'tmp.mat';
@@ -25,13 +28,18 @@ fprintf('done (%.2f sec)\n', toc)
 
 %% Разделяющие признаки на мембраны
 fprintf('Разделяющие признаки на мембраны (унарные потенциалы)...'), tic
-% model.mpr = mem_feature_old(model, ffeat); % old working features
-[X, mmark] = mem_features(ffeat);
-Y = zeros(size(mmark));
-Y(mmark) = 1;
-Y(~mmark) = -1;
-w = LassoIteratedRidge(X, double(Y), 2);
-model.mpr = 1 ./ (1 + exp(- X * w ));
+
+% old working features
+model.mpr = mem_feature_old(model, ffeat); 
+
+% new features (doesnt work)
+% [X, mmark] = mem_features(ffeat);
+% Y = zeros(size(mmark));
+% Y(mmark) = 1;
+% Y(~mmark) = -1;
+% w = LassoIteratedRidge(X, double(Y), 2);
+% model.mpr = 1 ./ (1 + exp(- X * w ));
+
 model.mprob = val2adj(model.mpr, model.edges, model.nodNumber);
 fprintf('done (%.2f sec)\n', toc)
 

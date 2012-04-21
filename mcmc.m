@@ -4,7 +4,7 @@
 model = create_model(1,1);
 
 % start gibbs
-iters = gibbs(model, 'maxiter', 10, 'ucross', true, 'uarea', true);
+iters = gibbs(model, 'maxiter', 10, 'ucross', false, 'uarea', false);
 
 % show result
 figure, show_lines(model, iters.mbest)
