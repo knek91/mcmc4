@@ -1,14 +1,19 @@
 %%model = create_model(fnumber, ffeat)
 % fnumber   image number
 % ffeat     image numbers to extract features
-function model = create_model(fnumber, ffeat)
+function model = create_model(fnumber, ffeat, varargin)
 %% Смотрим на диске
-% fname = 'tmp.mat';
 fname = sprintf('model%d.mat',fnumber);
-if exist(fname,'file')
-    load(fname)
-    fprintf('%s загружена с диска\n',fname);
-    return
+if numel(varargin) == 0
+    if exist(fname,'file')
+        load(fname)
+        fprintf('%s загружена с диска\n',fname);
+        return
+    end
+end
+
+if nargin == 1
+    ffeat = fnumber;
 end
     
 %% Считываем ручную разметку
@@ -30,15 +35,22 @@ fprintf('done (%.2f sec)\n', toc)
 fprintf('Разделяющие признаки на мембраны (унарные потенциалы)...'), tic
 
 % old working features
-model.mpr = mem_feature_old(model, ffeat); 
+% model.mpr = mem_feature_old(model, ffeat); 
 
-% new features (doesnt work)
+% lasso features (doesnt work)
 % [X, mmark] = mem_features(ffeat);
 % Y = zeros(size(mmark));
 % Y(mmark) = 1;
 % Y(~mmark) = -1;
 % w = LassoIteratedRidge(X, double(Y), 2);
 % model.mpr = 1 ./ (1 + exp(- X * w ));
+
+% hist features (working better)
+X = mem_features(ffeat);
+hist_size = 30;
+[edges, pos, neg] = features2hist(X, model.mmark, hist_size);
+I = [4 6 27 29 30 32 33 35];
+model.mpr = hist_prob(X(:, I), edges(I', :), neg(I', :), pos(I', :));
 
 model.mprob = val2adj(model.mpr, model.edges, model.nodNumber);
 fprintf('done (%.2f sec)\n', toc)

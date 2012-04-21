@@ -1,10 +1,13 @@
 %% Start example
 
+% image number
+fnumber = 1;
+
 % create a model
-model = create_model(1,1);
+model = create_model(fnumber);
 
 % start gibbs
-iters = gibbs(model, 'maxiter', 10, 'ucross', false, 'uarea', false);
+iters = gibbs(model, 'maxiter', 10, 'ucross', true, 'uarea', false);
 
 % show result
 figure, show_lines(model, iters.mbest)

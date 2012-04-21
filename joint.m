@@ -7,8 +7,8 @@ if ~isfield(model, 'use_nodfeat')
     p = 0;
 
     if any(S)
-        X = model.x(mcur(node,:))-model.x(node);
-        Y = model.y(mcur(node,:))-model.y(node);
+        X = model.x(mcur(node,:)) - model.x(node);
+        Y = model.y(mcur(node,:)) - model.y(node);
 
         if numel(X) <= 1 
             A = 0;

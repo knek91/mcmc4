@@ -1,5 +1,5 @@
 function mcur = dtri(model)    
-    DT = DelaunayTri([model.x' model.y'], C);
+    DT = DelaunayTri([model.x' model.y']);
     edges = DT.edges;
     mcur = false(size(model.mtrue));
     for i = 1 : size(DT.edges,1)
