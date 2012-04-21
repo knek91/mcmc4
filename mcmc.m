@@ -1,9 +1,15 @@
-%% Time test
-fnumbers = [1,5];
-for fnumber = 1
-    model = create_model(fnumber, fnumbers);
-    iters = gibbs(model, 'maxiter', 10, 'ucross', true, 'uarea', true);
-end
+%% Start example
+
+% create a model
+model = create_model(fnumber, fnumbers);
+
+% start gibbs
+iters = gibbs(model, 'maxiter', 10, 'ucross', true, 'uarea', true);
+
+% show result
+figure, show_lines(model, iters.mbest)
+
+%% Code below is for one of the reports (unnecessary to run)
 
 %% результаты тестирования старых мсмс на двух картинках
 % признаки берутся по обоим картинкам (просто объединяем прецеденты)
