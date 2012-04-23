@@ -49,9 +49,16 @@ if umark
 end
 
 if uarea
+    % запрещаем пересечения
     ucross = true;
+    
+    % фиксируем границу
     model.mprob(model.border | model.border') = 1;
     model.mpr = adj2val(model.mprob, model.edges);
+    
+    % чтобы энергия на minit была коненчой
+    minit(model.mprob == 1) = true;  % плохо: могут появиться пересечения
+    minit(model.mprob == 0) = false;
 end
 
 mcur = minit;
@@ -165,10 +172,10 @@ for iter = 1 : maxiter
                 s1 = left_cell([n1 n2], mcur, model, model.border);
                 s2 = left_cell([n2 n1], mcur, model, model.border);
                 
-                if ~isnan(s1) && ~isnan(s2)
-                    p1 = cellprob(s1, model);
-                    p2 = cellprob(s2, model);
-                    p0 = cellprob(s1+s2, model);
+                if ~isempty(s1) && ~isempty(s2)
+                    p1 = cellprob(model, s1);
+                    p2 = cellprob(model, s2);
+                    p0 = cellprob(model, s1, s2);
                     
                     ptrue = ptrue * p1 * p2;
                     pfalse = pfalse * p0;
@@ -187,7 +194,12 @@ for iter = 1 : maxiter
 end
 
 for fout = foutput
-    fprintf('iter mean time: %.2f\n', mean(iters.time(2:end)-iters.time(1:end-1)))
+    if numel(iters.time) == 1
+        mt = iters.time(1);
+    else
+        mt = mean(iters.time(2:end)-iters.time(1:end-1));
+    end
+    fprintf('iter mean time: %.2f\n', mt)
 end
 
 if ~isempty(savefin)

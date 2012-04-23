@@ -37,14 +37,6 @@ fprintf('Разделяющие признаки на мембраны (унарные потенциалы)...'), tic
 % old working features
 % model.mpr = mem_feature_old(model, ffeat); 
 
-% lasso features (doesnt work)
-% [X, mmark] = mem_features(ffeat);
-% Y = zeros(size(mmark));
-% Y(mmark) = 1;
-% Y(~mmark) = -1;
-% w = LassoIteratedRidge(X, double(Y), 2);
-% model.mpr = 1 ./ (1 + exp(- X * w ));
-
 % hist features (working better)
 X = mem_features(ffeat);
 hist_size = 30;
@@ -67,11 +59,42 @@ fprintf('Распределение на клетки...'), tic
 [pfeat, xfeat] = cell_stat(ffeat);
 model.xcell = xfeat;
 model.pcell = pfeat;
+
+% для конечной энергии (нулевые вероятности на числе узлов)
+add_size = 15;
+model.xcell = [model.xcell zeros(2, add_size)];
+model.pcell = [model.pcell zeros(2, add_size)];
+model.pcell(:, end - add_size + 1 : end) = eps ^ 2;
+model.xcell(2, end - add_size : end) = model.xcell(2, end - add_size) : model.xcell(2, end - add_size) + add_size;
+ds = model.xcell(1, 2) - model.xcell(1, 1);
+for i = size(model.xcell, 2) - add_size + 1 : size(model.xcell, 2)
+    model.xcell(1, i) = model.xcell(1, i - 1) + ds;
+end
+
+model.pcell(2, model.pcell(2, :) == 0) = eps ^ 2;
+model.pcell(2, :) = model.pcell(2, :) / sum(model.pcell(2, :));
+% figure,bar(model.xcell(1,:),model.pcell(1,:))
+% figure,bar(model.xcell(2,:),model.pcell(2,:))
+
+% для конечной энергии (нулевые вероятности на степени узлов)
+model.pnode(1,model.pnode(1,:) == 0) = eps ^ 2;
+model.pnode(1,:) = model.pnode(1,:) / sum(model.pnode(1,:));
+
+% беск энергия из за мембран
+% mcur(model.mprob==1) = true; % возникнут пересечения, поэтому лучше убрать
+% mcur(model.mprob==0) = false; % тоже фигня
+% лучше:
+model.mprob(model.mprob == 1) = 1 - max(model.mprob(model.mprob < 1) * eps);
+model.mprob(model.mprob == 0) = min(model.mprob(model.mprob > 0) * eps);
+model.mprob = model.mprob .* model.mfull;
+model.mpr = adj2val(model.mprob, model.edges);
+
 fprintf('done (%.2f sec)\n', toc)
 
 %% Граница
-[~, border] = cell_areas(model.mtrue, model);
-model.border = border;
+% [~, ~, border] = cell_areas(model.mtrue, model);
+% model.border = border;
+model.border = false(size(model.mtrue)); % отключаем границу
 
 %% Сохраняем модель
 fprintf('Сохраняем модель...'), tic

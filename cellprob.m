@@ -1,13 +1,19 @@
-function p = cellprob(s, model)
+function p = cellprob(model, s, s2)
 
-xind = find(model.xcell <= s, 1, 'last');
-if ~isempty(xind)
-    p = model.pcell(xind);
+if nargin == 3 % union of two cells
+    s(1) = s(1) + s2(1); % area
+%     s(2) = s(2) + s2(2) - 2; % vertices;
+end
+
+xarea = find(model.xcell(1,:) <= s(1), 1, 'last');
+if ~isempty(xarea)
+%     xvert = model.xcell(2,:) == s(2);
+%     if any(xvert)
+%         p = model.pcell(1, xarea) * model.pcell(2, xvert);
+%     else
+%         p = 0;
+%     end
+    p = model.pcell(1, xarea);
 else
     p = 0;
-%     p = eps;
-%     xmax = find(model.pcell > 0,1,'last');
-%     vmax = model.pcell(xmax);
-%     c = vmax * exp(xmax ^ 2);
-%     p = c * exp(-s^2);
 end

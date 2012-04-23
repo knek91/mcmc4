@@ -25,9 +25,9 @@ while ~ignore(n(1),n(2))
 end
 
 if numel(nodes) > 3 && nodes(end) == nodes(1)
-    f = polyarea(model.x(nodes), model.y(nodes));
+    f = [polyarea(model.x(nodes), model.y(nodes)) numel(nodes)-1];
 else
-    f = nan;
+    f = [];
 end
 
 end

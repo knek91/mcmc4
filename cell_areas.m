@@ -1,4 +1,4 @@
-function [S border] = cell_areas(mcur, model, ignore)
+function [S V border] = cell_areas(mcur, model, ignore)
 
 if nargin == 2
     ignore = false(size(model.mtrue));
@@ -7,6 +7,7 @@ end
 border = false(size(model.mtrue));
 
 S = [];
+V = []; 
 
 visited = true(size(model.mtrue));
 visited(mcur) = false;
@@ -34,8 +35,10 @@ for j = find(mlist)'
     if numel(nodes) > 3 && nodes(end) == nodes(1)
         s = polyarea(model.x(nodes), model.y(nodes));
         S = [S s];
+        V = [V numel(nodes)-1];
         
-        if nargout == 2 && s > 10000
+        border_area = 10000;
+        if nargout == 3 && s > border_area % consider S > border_area as a border
             for n = 1 : numel(nodes)-1
                 border(nodes(n),nodes(n+1)) = true;
             end
